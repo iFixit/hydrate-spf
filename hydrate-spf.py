@@ -83,7 +83,7 @@ def hydrate_mechanism(mechanism, domain=None):
             for (_, (record)) in spf.DNSLookup(value, 'txt'):
                 record = ''.join(record)
                 # TXT records are used for a lot of other things.
-                if not record.split()[0] == spfPrefix:
+                if record.split()[0] != spfPrefix:
                     continue
 
                 records.append(
