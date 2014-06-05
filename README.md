@@ -78,5 +78,5 @@ presented with differing records, so we can't guarantee conformance.
 hydrate-spf is offered under the permissive [zlib license].  See `LICENSE` for
 details.
 
-[zlib-license]: http://opensource.org/licenses/Zlib
+[zlib license]: http://opensource.org/licenses/Zlib
 
