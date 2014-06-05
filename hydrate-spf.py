@@ -28,6 +28,10 @@ def hydrate_mechanism(mechanism, domain=None):
     Even if there are multiple resolutions.
     >>> hydrate_mechanism('a', 'microsoft.com')
     'ip4:134.170.188.221 ip4:65.55.58.201'
+
+    MX records should similarly be resolved.
+    >>> hydrate_mechanism('mx', 'ifixit.com')
+    'ip4:173.203.2.36 ip4:98.129.184.4'
     """
     (mechanism, value, netmask, netmask6) = spf.parse_mechanism(mechanism, domain)
     if mechanism == 'ip4':
@@ -39,6 +43,15 @@ def hydrate_mechanism(mechanism, domain=None):
         records = []
         for (_, ip) in spf.DNSLookup(value, 'a'):
             records.append('ip4:%s' % ip)
+        # Sort the records so the order is predictable for our tests.
+        records.sort()
+        return ' '.join(records)
+    if mechanism == 'mx':
+        records = []
+        for (_, (_, domain)) in spf.DNSLookup(value, 'mx'):
+            # MX records give us back a domain, so we need to do another
+            # lookup.
+            records.append(hydrate_mechanism('a:%s' % domain))
         # Sort the records so the order is predictable for our tests.
         records.sort()
         return ' '.join(records)
