@@ -26,6 +26,22 @@ filling an object with data looked up from the database.
 
 ## Installation
 
+    [$]> pip install hydrate_spf
+
+or
+
+    [$]> easy_install hydrate_spf
+
+### Hacking
+
+If you want to install it locally to hack on it, install hydrate-spf from git:
+
+    [$]> git clone git@github.com:iFixit/hydrate-spf.git
+    [$]> virtualenv --no-site-packages --distribute env
+    [$]> source env/bin/activate
+    [$]> pip install -r requirements.txt
+    [$]> pip install -e .
+
 ## Usage
 
     [$]> ./hydrate-spf.py --help
