@@ -57,3 +57,10 @@ Also, `SPF` records are preferred over `TXT` records when processing an
 they *must* be the same; we don't know what common implementations do when
 presented with differing records, so we can't guarantee conformance.
 
+## License
+
+hydrate-spf is offered under the permissive [zlib license].  See `LICENSE` for
+details.
+
+[zlib-license]: http://opensource.org/licenses/Zlib
+
