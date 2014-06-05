@@ -28,6 +28,22 @@ filling an object with data looked up from the database.
 
 ## Usage
 
+    [$]> ./hydrate-spf.py --help
+    hydrate-spf
+    
+    Usage:
+        hydrate-spf <record> <domain>
+        hydrate-spf [-v] test
+        hydrate-spf --version
+        hydrate-spf (-h | --help)
+    
+    Options:
+        -v            Verbose test output.
+           --version  Show version.
+        -h --help     Show this screen.
+    [$]> ./hydrate-spf.py 'v=spf1 a mx ~all' ifixit.com
+    v=spf1 ip4:75.101.159.182 ip4:173.203.2.36 ip4:98.129.184.4 ~all
+
 ### Caveats
 
 A hydrated record containing an `include` mechanism will not behave in exactly

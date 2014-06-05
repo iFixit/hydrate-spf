@@ -1,9 +1,23 @@
 #!/usr/bin/env python
+"""hydrate-spf
+
+Usage:
+    hydrate-spf <record> <domain>
+    hydrate-spf [-v] test
+    hydrate-spf --version
+    hydrate-spf (-h | --help)
+
+Options:
+    -v            Verbose test output.
+       --version  Show version.
+    -h --help     Show this screen.
+"""
 
 import re
 
 import spf
 
+VERSION = '0.1.0'
 spfPrefix = 'v=spf1'
 
 def hydrate_mechanism(mechanism, domain=None):
@@ -124,6 +138,11 @@ def hydrate_record(record, domain=None, fullRecord=True):
     return ' '.join(hydratedRecords)
 
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+    from docopt import docopt
+    arguments = docopt(__doc__, version=VERSION)
+    if arguments['test']:
+        import doctest
+        doctest.testmod()
+    else:
+        print(hydrate_record(arguments['<record>'], arguments['<domain>']))
 
