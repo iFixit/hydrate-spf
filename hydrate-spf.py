@@ -4,6 +4,8 @@ import re
 
 import spf
 
+spfPrefix = 'v=spf1'
+
 def hydrate_mechanism(mechanism, domain=None):
     """
     A mechanism is an entry in an SPF record that dictates a server or set of
@@ -39,6 +41,10 @@ def hydrate_mechanism(mechanism, domain=None):
     rules.  It will prefer the SPF record...
     >>> hydrate_mechanism('include', 'mailtank.com')
     'ip4:65.50.229.106 ip4:66.181.10.77 ip4:66.181.10.77 ip4:66.181.10.77'
+
+    ...but fall back to SPF TXT records.
+    >>> hydrate_mechanism('include', 'helpscoutemail.com')
+    'ip4:23.23.237.213 ip4:74.63.63.121 ip4:74.63.63.115 ip4:54.243.205.80'
     """
     (mechanism, value, netmask, netmask6) = spf.parse_mechanism(mechanism, domain)
     if mechanism == 'ip4':
@@ -72,6 +78,16 @@ def hydrate_mechanism(mechanism, domain=None):
             record = ''.join(record)
             records.append(
                 hydrate_record(record, domain=value, fullRecord=False))
+        # Did we fail to get something from the SPF lookup?  Try TXT instead.
+        if not records:
+            for (_, (record)) in spf.DNSLookup(value, 'txt'):
+                record = ''.join(record)
+                # TXT records are used for a lot of other things.
+                if not record.split()[0] == spfPrefix:
+                    continue
+
+                records.append(
+                    hydrate_record(record, domain=value, fullRecord=False))
         # Sort the records so the order is predictable for our tests.
         records.sort()
         return ' '.join(records)
@@ -87,7 +103,6 @@ def hydrate_record(record, domain=None, fullRecord=True):
     :var boolean fullRecord: Should we return the SPF version prefix and 'all'
                              modifier suffix?  `False` is useful for `include`.
     """
-    spfPrefix = 'v=spf1'
     spfSuffix = ''
 
     mechanisms = record.split()
@@ -97,6 +112,7 @@ def hydrate_record(record, domain=None, fullRecord=True):
         # 'all' (and variants) ends rightward parsing.
         # http://www.openspf.org/RFC_4408#mech-all
         # Available qualifiers: http://www.openspf.org/RFC_4408#evaluation-mech
+        # TODO: This regex wants to be unit-tested.
         if re.match(r'^[-+~?]?all$', mechanism):
             spfSuffix = mechanism
             break
