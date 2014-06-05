@@ -24,6 +24,10 @@ def hydrate_mechanism(mechanism, domain=None):
     A records should be converted to their resolved IPs.
     >>> hydrate_mechanism('a', 'ifixit.com')
     'ip4:75.101.159.182'
+
+    Even if there are multiple resolutions.
+    >>> hydrate_mechanism('a', 'microsoft.com')
+    'ip4:134.170.188.221 ip4:65.55.58.201'
     """
     (mechanism, value, netmask, netmask6) = spf.parse_mechanism(mechanism, domain)
     if mechanism == 'ip4':
@@ -35,6 +39,8 @@ def hydrate_mechanism(mechanism, domain=None):
         records = []
         for (_, ip) in spf.DNSLookup(value, 'a'):
             records.append('ip4:%s' % ip)
+        # Sort the records so the order is predictable for our tests.
+        records.sort()
         return ' '.join(records)
     raise Exception('Unknown mechanism %s' % mechanism)
 
