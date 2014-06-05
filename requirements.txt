@@ -1,0 +1,4 @@
+ipaddr==2.1.11
+pydns==2.3.6
+pyspf==2.0.9
+wsgiref==0.1.2
