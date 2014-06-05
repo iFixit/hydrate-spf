@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+"""hydrate-spf
+
+Usage:
+    hydrate-spf <record> <domain>
+    hydrate-spf [-v] test
+    hydrate-spf --version
+    hydrate-spf (-h | --help)
+
+Options:
+    -v            Verbose test output.
+       --version  Show version.
+    -h --help     Show this screen.
+"""
+
+import hydrate_spf
+
+if __name__ == '__main__':
+    from docopt import docopt
+    arguments = docopt(__doc__, version=hydrate_spf.VERSION)
+    if arguments['test']:
+        import doctest
+        doctest.testmod(hydrate_spf)
+    else:
+        print(hydrate_spf.hydrate_record(
+            arguments['<record>'], arguments['<domain>']))
+

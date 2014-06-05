@@ -1,18 +1,3 @@
-#!/usr/bin/env python
-"""hydrate-spf
-
-Usage:
-    hydrate-spf <record> <domain>
-    hydrate-spf [-v] test
-    hydrate-spf --version
-    hydrate-spf (-h | --help)
-
-Options:
-    -v            Verbose test output.
-       --version  Show version.
-    -h --help     Show this screen.
-"""
-
 import re
 
 import spf
@@ -136,13 +121,4 @@ def hydrate_record(record, domain=None, fullRecord=True):
         hydratedRecords = [spfPrefix] + hydratedRecords + [spfSuffix]
 
     return ' '.join(hydratedRecords)
-
-if __name__ == '__main__':
-    from docopt import docopt
-    arguments = docopt(__doc__, version=VERSION)
-    if arguments['test']:
-        import doctest
-        doctest.testmod()
-    else:
-        print(hydrate_record(arguments['<record>'], arguments['<domain>']))
 
