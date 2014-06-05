@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import re
+
 import spf
 
 def hydrate_mechanism(mechanism, domain=None):
@@ -32,6 +34,11 @@ def hydrate_mechanism(mechanism, domain=None):
     MX records should similarly be resolved.
     >>> hydrate_mechanism('mx', 'ifixit.com')
     'ip4:173.203.2.36 ip4:98.129.184.4'
+
+    An include must do a recursive hydration of the included domain's SPF
+    rules.  It will prefer the SPF record...
+    >>> hydrate_mechanism('include', 'mailtank.com')
+    'ip4:65.50.229.106 ip4:66.181.10.77 ip4:66.181.10.77 ip4:66.181.10.77'
     """
     (mechanism, value, netmask, netmask6) = spf.parse_mechanism(mechanism, domain)
     if mechanism == 'ip4':
@@ -55,7 +62,50 @@ def hydrate_mechanism(mechanism, domain=None):
         # Sort the records so the order is predictable for our tests.
         records.sort()
         return ' '.join(records)
-    raise Exception('Unknown mechanism %s' % mechanism)
+    if mechanism == 'include':
+        records = []
+        for (_, (record)) in spf.DNSLookup(value, 'spf'):
+            # We get back a list of records, even if there's only one (the
+            # usual case).  But the RFC says multiple records are valid, so we
+            # might as well join in case there's more than one.
+            # http://www.openspf.org/RFC_4408#multiple-strings
+            record = ''.join(record)
+            records.append(
+                hydrate_record(record, domain=value, fullRecord=False))
+        # Sort the records so the order is predictable for our tests.
+        records.sort()
+        return ' '.join(records)
+    raise Exception('Unknown mechanism "%s"' % mechanism)
+
+def hydrate_record(record, domain=None, fullRecord=True):
+    """
+    Hydrate an entire SPF record.
+
+    :var string record: The entire SPF string, as stored in DNS.
+    :var string domain: The domain of the record we're parsing.  Needed for
+                        evaluating A and MX mechanisms.
+    :var boolean fullRecord: Should we return the SPF version prefix and 'all'
+                             modifier suffix?  `False` is useful for `include`.
+    """
+    spfPrefix = 'v=spf1'
+    spfSuffix = ''
+
+    mechanisms = record.split()
+    mechanisms.remove(spfPrefix)
+    hydratedRecords = []
+    for mechanism in mechanisms:
+        # 'all' (and variants) ends rightward parsing.
+        # http://www.openspf.org/RFC_4408#mech-all
+        # Available qualifiers: http://www.openspf.org/RFC_4408#evaluation-mech
+        if re.match(r'^[-+~?]?all$', mechanism):
+            spfSuffix = mechanism
+            break
+        hydratedRecords.append(hydrate_mechanism(mechanism, domain))
+
+    if fullRecord:
+        hydratedRecords = [spfPrefix] + hydratedRecords + [spfSuffix]
+
+    return ' '.join(hydratedRecords)
 
 if __name__ == '__main__':
     import doctest

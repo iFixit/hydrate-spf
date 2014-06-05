@@ -28,3 +28,16 @@ filling an object with data looked up from the database.
 
 ## Usage
 
+### Caveats
+
+A hydrated record containing an `include` mechanism will not behave in exactly
+the same way it would prior to hydration.  `include`s are more accurately
+recursive calls, which means the modifier on the included record's `all` is
+used when evaluating its rules; a hydrated record will only use the modifier
+specified at the top-level record.
+
+Also, `SPF` records are preferred over `TXT` records when processing an
+`include`.  RFC 4408 states that if there are both `TXT` and `SPF` records,
+they *must* be the same; we don't know what common implementations do when
+presented with differing records, so we can't guarantee conformance.
+
