@@ -58,7 +58,7 @@ If you want to install it locally to hack on it, install hydrate-spf from git:
            --version  Show version.
         -h --help     Show this screen.
     [$]> ./hydrate-spf.py 'v=spf1 a mx ~all' ifixit.com
-    v=spf1 ip4:75.101.159.182 ip4:173.203.2.36 ip4:98.129.184.4 ~all
+    "v=spf1 ip4:75.101.159.182 ip4:173.203.2.36 ip4:98.129.184.4 ~all"
 
 ### Caveats
 
@@ -72,6 +72,13 @@ Also, `SPF` records are preferred over `TXT` records when processing an
 `include`.  RFC 4408 states that if there are both `TXT` and `SPF` records,
 they *must* be the same; we don't know what common implementations do when
 presented with differing records, so we can't guarantee conformance.
+
+## Changes
+
+### v0.2.0
+
+* Hydrated records are now returned inside double quotes.
+* Hydrated records longer than 255 characters are split into multiple strings.
 
 ## License
 

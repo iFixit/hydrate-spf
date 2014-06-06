@@ -119,5 +119,20 @@ def hydrate_record(record, domain=None, fullRecord=True):
     if fullRecord:
         hydratedRecords = [spfPrefix] + hydratedRecords + [spfSuffix]
 
-    return ' '.join(hydratedRecords)
+    hydratedRecord = ' '.join(hydratedRecords)
+
+    if fullRecord:
+        # DNS doesn't allow individual strings to be greater than 255
+        # characters.  Thankfully, the RFC specifies that multiple strings must
+        # be joined without additional whitespace, so we don't need to ensure
+        # we break on words.
+        # http://www.openspf.org/RFC_4408#multiple-strings
+        splitRecord = split_by_length(hydratedRecord, 255)
+        hydratedRecord = '"%s"' % '" "'.join(splitRecord)
+
+    return hydratedRecord
+
+def split_by_length(string, length):
+    # http://forums.devshed.com/python-programming/390312-efficient-splitting-string-fixed-size-chunks-post1627881.html#post1627881
+    return [string[i:i+length] for i in range(0, len(string), length)]
 
